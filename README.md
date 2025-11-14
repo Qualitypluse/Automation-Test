@@ -92,4 +92,4 @@ The **RoomBookingTest.java** contains automation for:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/YourUsername/AutomationInTesting.git
+git clone [https://github.com/Qualitypluse/Automation-Test.git]

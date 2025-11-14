@@ -1,0 +1,149 @@
+package com.mycompany.automation;
+
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import java.time.Duration;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+
+public class BookingAndLinksTest {
+
+    private WebDriver driver;
+    private WebDriverWait wait;
+    private final String BASE_URL = "https://automationintesting.online/#/booking";
+
+    @BeforeEach
+    public void setup() {
+        // نقطة هامة: يجب التأكد من ضبط الـ ChromeDriver
+        // إذا لم يعمل المتصفح مباشرة، استخدمي وعدّلي السطر التالي:
+        // System.setProperty("webdriver.chrome.driver", "C:\\Drivers\\chromedriver.exe");
+
+        driver = new ChromeDriver();
+        driver.manage().window().maximize();
+        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+    }
+
+    // -----------------------------------------------------------
+    // اختبار 1: أتمتة حجز غرفة Suite Room
+    // -----------------------------------------------------------
+    @Test
+    public void testSuiteRoomBooking() {
+        driver.get(BASE_URL);
+
+        // Locating and clicking the 'Book this room' button for the Suite Room
+        WebElement bookSuiteButton = wait.until(
+            ExpectedConditions.elementToBeClickable(By.xpath("//div[contains(text(), 'Suite')]/ancestor::div[contains(@class, 'row')]/div[contains(@class, 'col-sm-2')]//button[text()='Book this room']"))
+        );
+        bookSuiteButton.click();
+
+        // Wait for the booking modal to appear
+        By bookingFormLocator = By.xpath("//div[@class='modal-content']");
+        wait.until(ExpectedConditions.visibilityOfElementLocated(bookingFormLocator));
+
+        // Input data
+        String firstName = "NetBeans";
+        String lastName = "User";
+        String email = "finaltest_" + System.currentTimeMillis() + "@test.com";
+
+        driver.findElement(By.name("firstname")).sendKeys(firstName);
+        driver.findElement(By.name("lastname")).sendKeys(lastName);
+        driver.findElement(By.name("email")).sendKeys(email);
+        driver.findElement(By.name("phone")).sendKeys("012345678901");
+
+        // Select two dates (first two available days)
+        driver.findElement(By.xpath("//div[@class='rbc-day-bg' and not(contains(@class, 'rbc-off-range-bg'))][1]")).click();
+        driver.findElement(By.xpath("//div[@class='rbc-day-bg' and not(contains(@class, 'rbc-off-range-bg'))][2]")).click();
+
+        // Click the 'Book' button within the modal
+        driver.findElement(By.xpath("//button[text()='Book']")).click();
+
+        // Verify the success message
+        By successMessageLocator = By.xpath("//div[@class='alert alert-success']");
+        WebElement successMessage = wait.until(ExpectedConditions.visibilityOfElementLocated(successMessageLocator));
+
+        assertTrue(successMessage.getText().contains("Booking Successful!"),
+                   "Assertion Failed: Booking confirmation message not found.");
+
+        // Close the confirmation modal
+        driver.findElement(By.xpath("//button[text()='Close']")).click();
+    }
+
+    // -----------------------------------------------------------
+    // اختبار 2: أتمتة الروابط السريعة وروابط الشريط
+    // -----------------------------------------------------------
+    @Test
+    public void testAllNavigationLinks() {
+        driver.get(BASE_URL);
+
+        // Collect links from Navigation Bar and Quick Links (Footer)
+        List<WebElement> headerLinks = driver.findElements(By.xpath("//div[@id='navbarCollapse']//a"));
+        List<WebElement> footerLinks = driver.findElements(By.xpath("//footer//a"));
+
+        List<Map<String, String>> allLinkDetails = new ArrayList<>();
+
+        // Helper method to extract link details
+        for (WebElement link : headerLinks) {
+            if (!link.getText().trim().isEmpty()) {
+                Map<String, String> details = new HashMap<>();
+                details.put("text", link.getText().trim());
+                allLinkDetails.add(details);
+            }
+        }
+        for (WebElement link : footerLinks) {
+            if (!link.getText().trim().isEmpty()) {
+                Map<String, String> details = new HashMap<>();
+                details.put("text", link.getText().trim());
+                allLinkDetails.add(details);
+            }
+        }
+
+        // Loop through all collected links by text
+        for (Map<String, String> linkDetail : allLinkDetails) {
+            String linkText = linkDetail.get("text");
+
+            // Re-locate the element using its text (more stable locator)
+            By linkLocator = By.xpath("//a[normalize-space(text())='" + linkText + "']");
+            WebElement currentLink = wait.until(ExpectedConditions.elementToBeClickable(linkLocator));
+
+            System.out.println("Testing link: " + linkText);
+            currentLink.click();
+
+            // Assertion 1: Check if the URL has changed and contains the link text
+            String currentUrl = driver.getCurrentUrl();
+            assertTrue(currentUrl.toLowerCase().contains(linkText.toLowerCase().replace(" ", "")),
+                       "Link validation failed for: " + linkText + ". URL: " + currentUrl);
+
+            // Assertion 2: Specific check for Admin link (waiting for Login header)
+            if (linkText.equalsIgnoreCase("Admin")) {
+                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h2[text()='Login']")));
+            }
+
+            // Navigate back to the main page
+            driver.navigate().back();
+
+            // Wait for a key element on the home page to ensure full return
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h2[text()='Rooms']")));
+        }
+    }
+
+    @AfterEach
+    public void teardown() {
+        // Close the browser
+        if (driver != null) {
+            driver.quit();
+        }
+    }
+} }

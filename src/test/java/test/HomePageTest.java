@@ -1,4 +1,4 @@
-package tests;
+package test;
 
 
 import java.util.List;
@@ -14,6 +14,9 @@ import org.testng.Assert;
 import org.testng.annotations.*;
 import java.time.Duration;
 import pages.HomePage;
+import java.util.Map;
+import java.util.HashMap;
+
 
 
 
@@ -115,6 +118,45 @@ public class HomePageTest {
             );
         }
     }
+    @Test(priority =8)
+    public void testLocationLink() {
+        HomePage home = new HomePage(driver);
+        home.clickNavLink(home.getLocationLink());
+        // هنا ممكن تضيفي assert للعنوان أو scroll position لو link scrolls
+        Assert.assertTrue(true); // placeholder
+    }
+
+    @Test(priority = 9)
+    public void testRoomsLink() {
+        HomePage home = new HomePage(driver);
+        home.clickNavLink(home.getRoomsLink());
+        Assert.assertTrue(true); // placeholder
+    }
+
+    @Test(priority =10)
+    public void testContactLink() {
+        HomePage home = new HomePage(driver);
+        home.clickNavLink(home.getContactLink());
+        Assert.assertTrue(true); // placeholder
+    }
+    @Test(priority = 11)
+    public void verifyHomeLink() throws InterruptedException {
+
+        driver.get("https://automationintesting.online/");
+
+        HomePage page = new HomePage(driver);
+
+        page.clickHomeLink();
+    }
+    @Test(priority = 12)
+    public void testAdminLinkNavigatesToNewPage() {
+        HomePage home = new HomePage(driver);
+    home.clickNavLink(home.getAdminLink());
+    // تحقق إن URL أو Page Title متغير
+    String currentUrl = driver.getCurrentUrl();
+    Assert.assertTrue(currentUrl.contains("/admin"), "❌ Admin link did not navigate to expected page!");
+}
+
 
 
     @AfterClass

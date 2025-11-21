@@ -1,12 +1,11 @@
-<!--<?xml version="1.0" encoding="UTF-8"?>-->
-<!--<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">-->
-<!--<suite name="Login ">-->
-<!--    <test name="Login Page">-->
-<!--        <classes>-->
-<!--            <class name="tests.LoginTest"/>-->
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="BookingSuite" parallel="methods" thread-count="3" verbose="1">
 
+    <test name="UI Tests">
+        <classes>
+            <class name="test.HomePageTest"/>
+<!--            <class name="test.DoubleRoomTest"/>-->
+        </classes>
+    </test>
 
-<!--        </classes>-->
-<!--    </test>-->
-<!--</suite>-->
-<!-- -->
+</suite>
